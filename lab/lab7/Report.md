@@ -100,3 +100,5 @@ HTML vs JSON
 ---
 
 ### Сдача через Pull Request
+
+![Описание](screenshots/17-pull-request.png)
