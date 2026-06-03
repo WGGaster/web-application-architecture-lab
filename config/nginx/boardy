@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name khalitov.ai-info;
+    server_name khalitov.ai-info.ru;
  
     root /var/www/boardy;
     index index.html;
@@ -15,9 +15,19 @@ server {
         fastcgi_param SCRIPT_FILENAME /var/www/boardy/cgi-bin/messages.sh;
      }
 
+    location /phpmyadmin {
+	alias /usr/share/phpmyadmin;
+	index index.php;
 
+	location ~ \.php$ {
+            fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $request_filename;
+        }
+    }
+ 	
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
      }
