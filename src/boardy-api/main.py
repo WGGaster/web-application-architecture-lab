@@ -1,14 +1,22 @@
 from fastapi import FastAPI
 from datetime import datetime
-import asyncio
-import time
-import os
+import aiomysql
 
-app = FastAPI(title='Boardy API',  version='0.1.0')
+app = FastAPI(title='Boardy API',  version='0.2.0')
 
-MESSAGES_FILE = '/var/www/boardy/data/messages.txt'
+DB_CONFIG = {
+    'host': '127.0.0.1',
+    'port': 3306,
+    'user': 'boardy',
+    'password': '1234',
+    'db': 'boardy',
+    'charset': 'utf8mb4'
+}
 
-@app.get('/api/status')
+async def get_db():
+    return await aiomysql.connect(**DB_CONFIG)
+
+@app.get('/status')
 async def status():
     return {
 	'status' : 'ok',
@@ -16,21 +24,34 @@ async def status():
         'time' : str(datetime.now())
     }
 
-@app.get('/api/messages')
+@app.get('/messages')
 async def get_messages():
-    if not os.path.exists(MESSAGES_FILE):
-    	return { 'messages': [], 'count': 0 }
-    messages = []
-    with open(MESSAGES_FILE) as f:
-        for line in f:
-            parts = line.strip().split('|')
-            if len(parts) >= 3:
-                messages.append({
-                    'date': parts[0],
-                    'name': parts[1],
-                    'messages': parts[2]
-                })
-    return { 'messages': messages, 'count': len(messages)}
+    conn = await get_db()
+    async with conn.cursor(aiomysql.DictCursor) as cur:
+        await cur.execute(
+            'SELECT posts.body AS message, users.name, '
+            'posts.created_at FROM posts '
+            'JOIN users ON posts.author_id = users.id '
+            'ORDER BY posts.created_at DESC'
+        )
+        messages = await cur.fetchall()
+    conn.close()
+    for m in messages:
+        m['created_at'] = str(m['created_at'])
+    return {'messages': messages, 'count': len(messages)}
+
+@app.get('/users')
+async def get_users():
+    conn = await get_db()
+    async with conn.cursor(aiomysql.DictCursor) as cur:
+        await cur.execute(
+            'SELECT id, name, email, created_at FROM users'
+        )
+        users = await cur.fetchall()
+    conn.close()
+    for u in users:
+        u['created_at'] = str(u['created_at'])
+    return {'users': users, 'count': len(users)}
 
 # --- Демонстрация async ---
 
