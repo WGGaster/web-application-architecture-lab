@@ -1,14 +1,29 @@
 from fastapi import FastAPI
 from datetime import datetime
-import asyncio
-import time
-import os
+from fastapi.middleware.cors import CORSMiddleware
+from routers import comments
+from database import get_db
+import aiomysql, time, asyncio
 
-app = FastAPI(title='Boardy API',  version='0.1.0')
+origins = [
+    "http://khalitov.ai-info.ru",
+    "https://khalitov.ai-info.ru",
+    "http://localhost",
+    "http://localhost:8000",
+]
 
-MESSAGES_FILE = '/var/www/boardy/data/messages.txt'
+app = FastAPI(title='Boardy API',  version='0.2.0')
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
 
-@app.get('/api/status')
+app.include_router(comments.router, prefix='/api')
+
+
+@app.get('/status')
 async def status():
     return {
 	'status' : 'ok',
@@ -16,21 +31,34 @@ async def status():
         'time' : str(datetime.now())
     }
 
-@app.get('/api/messages')
+@app.get('/messages')
 async def get_messages():
-    if not os.path.exists(MESSAGES_FILE):
-    	return { 'messages': [], 'count': 0 }
-    messages = []
-    with open(MESSAGES_FILE) as f:
-        for line in f:
-            parts = line.strip().split('|')
-            if len(parts) >= 3:
-                messages.append({
-                    'date': parts[0],
-                    'name': parts[1],
-                    'messages': parts[2]
-                })
-    return { 'messages': messages, 'count': len(messages)}
+    conn = await get_db()
+    async with conn.cursor(aiomysql.DictCursor) as cur:
+        await cur.execute(
+            'SELECT posts.body AS message, users.name, '
+            'posts.created_at FROM posts '
+            'JOIN users ON posts.author_id = users.id '
+            'ORDER BY posts.created_at DESC'
+        )
+        messages = await cur.fetchall()
+    conn.close()
+    for m in messages:
+        m['created_at'] = str(m['created_at'])
+    return {'messages': messages, 'count': len(messages)}
+
+@app.get('/users')
+async def get_users():
+    conn = await get_db()
+    async with conn.cursor(aiomysql.DictCursor) as cur:
+        await cur.execute(
+            'SELECT id, name, email, created_at FROM users'
+        )
+        users = await cur.fetchall()
+    conn.close()
+    for u in users:
+        u['created_at'] = str(u['created_at'])
+    return {'users': users, 'count': len(users)}
 
 # --- Демонстрация async ---
 

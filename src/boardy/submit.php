@@ -1,9 +1,28 @@
 <?php
+require_once 'db.php';
+
 $name = $_POST['name'] ?? 'Аноним';
 $message = $_POST['message'] ?? '';
- 
-$line = date('Y-m-d H:i:s') . '|' . $name . '|' . $message . PHP_EOL;
-file_put_contents('/var/www/boardy/data/messages.txt', $line, FILE_APPEND);
+
+if ($name && $message) {
+    $stmt = $pdo->prepare('select id from users where name = ?');
+    $stmt->execute([$name]);
+    $user = $stmt->fetch();
+    
+    if (!$user) {
+	$stmt = $pdo->prepare(
+	    'insert into users (name, email, password) values (?, ?, ?)'
+	);
+	$stmt->execute([$name, $name.'@boardy.local', 'temp']);
+	$user_id = $pdo->lastInsertId();
+    } else {
+	$user_id = $user['id'];
+    }
+    $stmt = $pdo->prepare(
+        'INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)'
+    );
+    $stmt->execute(['Сообщение', $message, $user_id]);
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
