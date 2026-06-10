@@ -1,7 +1,12 @@
 server {
     listen 80;
+    listen 443 ssl;
+
     server_name khalitov.ai-info.ru;
  
+    ssl_certificate /etc/ssl/certs/localhost.crt;
+    ssl_certificate_key /etc/ssl/private/localhost.key;
+
     root /var/www/boardy;
     index index.html;
  
