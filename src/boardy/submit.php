@@ -1,39 +1,54 @@
 <?php
 require_once 'db.php';
+require_once 'my-lib/session.php';
 
-$name = $_POST['name'] ?? 'Аноним';
-$message = $_POST['message'] ?? '';
+startSession();
+isEmptySession();
 
-if ($name && $message) {
-    $stmt = $pdo->prepare('select id from users where name = ?');
-    $stmt->execute([$name]);
-    $user = $stmt->fetch();
-    
-    if (!$user) {
-	$stmt = $pdo->prepare(
-	    'insert into users (name, email, password) values (?, ?, ?)'
-	);
-	$stmt->execute([$name, $name.'@boardy.local', 'temp']);
-	$user_id = $pdo->lastInsertId();
+$post = $_POST['post'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if ($post) {
+        $stmt = $pdo->prepare(
+            'INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)'
+        );
+        $stmt->execute(['Сообщение', $post, $_SESSION['user_id']]);
+        header('Location: /messages.php');
+        exit;
     } else {
-	$user_id = $user['id'];
+        $error = 'Вы ничего не написали';
     }
-    $stmt = $pdo->prepare(
-        'INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)'
-    );
-    $stmt->execute(['Сообщение', $message, $user_id]);
 }
+
 ?>
-<!DOCTYPE html>
-<html lang="ru">
-<head><meta charset="utf-8"><title>Boardy</title>
-<link rel="stylesheet" href="/css/style.css"></head>
-<body>
-<header><h1><a href="/">Boardy</a></h1></header>
+
+<?php include __DIR__ . '/partials/head.php' ?>
+<?php include __DIR__ . '/partials/nav.php' ?>
+
+
+
 <main>
-  <h2>Спасибо, <?= htmlspecialchars($name) ?>!</h2>
-  <p>Ваше сообщение получено.</p>
-  <p><a href="/">На главную</a> |
-     <a href="/messages.php">Все сообщения</a></p>
+    <body>
+        <div class="solo-page page-new-post">
+            <h1>Новый пост</h1>
+            <?php if (!empty($error)): ?>
+                <div class="error-message">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
+            <form method="POST" action="">
+                <label for="post">Текст</label>
+                <textarea id="post" name="post"
+                      rows="5" required></textarea>
+                <div class="flex page-new-post-btn">
+                    <button type="submit" class="btn-submit">
+                        Опубликовать
+                    </button>
+                    <a href="/messages.php">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </body>
 </main>
-</body></html>
+
+
+<?php include __DIR__ . '/partials/foot.php' ?>
