@@ -1,6 +1,11 @@
 server {
     listen 80;
-    server_name api.khalitov.ai-info;
+    listen 443 ssl;
+
+    server_name api.khalitov.ai-info.ru;
+
+    ssl_certificate /etc/ssl/certs/api-khalitov-ai-info.crt;
+    ssl_certificate_key /etc/ssl/private/api-khalitov-ai-info.key;
  
     root /var/www/boardy-api;
     index index.html;

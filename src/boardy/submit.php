@@ -1,20 +1,54 @@
 <?php
-$name = $_POST['name'] ?? 'Аноним';
-$message = $_POST['message'] ?? '';
- 
-$line = date('Y-m-d H:i:s') . '|' . $name . '|' . $message . PHP_EOL;
-file_put_contents('/var/www/boardy/data/messages.txt', $line, FILE_APPEND);
+require_once 'db.php';
+require_once 'my-lib/session.php';
+
+startSession();
+isEmptySession();
+
+$post = $_POST['post'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if ($post) {
+        $stmt = $pdo->prepare(
+            'INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)'
+        );
+        $stmt->execute(['Сообщение', $post, $_SESSION['user_id']]);
+        header('Location: /messages.php');
+        exit;
+    } else {
+        $error = 'Вы ничего не написали';
+    }
+}
+
 ?>
-<!DOCTYPE html>
-<html lang="ru">
-<head><meta charset="utf-8"><title>Boardy</title>
-<link rel="stylesheet" href="/css/style.css"></head>
-<body>
-<header><h1><a href="/">Boardy</a></h1></header>
+
+<?php include __DIR__ . '/partials/head.php' ?>
+<?php include __DIR__ . '/partials/nav.php' ?>
+
+
+
 <main>
-  <h2>Спасибо, <?= htmlspecialchars($name) ?>!</h2>
-  <p>Ваше сообщение получено.</p>
-  <p><a href="/">На главную</a> |
-     <a href="/messages.php">Все сообщения</a></p>
+    <body>
+        <div class="solo-page page-new-post">
+            <h1>Новый пост</h1>
+            <?php if (!empty($error)): ?>
+                <div class="error-message">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
+            <form method="POST" action="">
+                <label for="post">Текст</label>
+                <textarea id="post" name="post"
+                      rows="5" required></textarea>
+                <div class="flex page-new-post-btn">
+                    <button type="submit" class="btn-submit">
+                        Опубликовать
+                    </button>
+                    <a href="/messages.php">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </body>
 </main>
-</body></html>
+
+
+<?php include __DIR__ . '/partials/foot.php' ?>

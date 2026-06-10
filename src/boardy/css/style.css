@@ -7,35 +7,28 @@
 
 body {
     font-family: -apple-system, sans-serif;
-    line-height: 1.6;
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 20px;
-    color: #333;
+    min-width: 600px;
 }
 
 header {
-    border-bottom: 2px solid #2c3e50;
-    padding-bottom: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 50px;
 }
 
-header h1 {
-    color: #2c3e50;
-}
-
-header h1 a {
-    color: #2c3e50;
-    text-decoration: none;
-}
-
-h2 {
-    margin: 20px 0 10px;
-    color: #34495e;
+h1, h2 {
+    color: #10527e;
 }
 
 a {
     color: #2980b9;
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+}
+
+.flex {
+    display: flex;
 }
 
 form {
@@ -59,7 +52,7 @@ input, textarea {
 button {
     margin-top: 15px;
     padding: 10px 25px;
-    background: #2c3e50;
+    background: #16507A;
     color: white;
     border: none;
     border-radius: 4px;
@@ -96,3 +89,112 @@ footer {
     color: #fff
 }
 
+/* шапка */
+
+.nav {
+    align-items: center;
+    justify-content: space-between;
+    background-color: #1A5276;
+    padding: 20px 20px;
+    width: 100%;
+}
+
+.nav-left {
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px
+}
+
+.nav-right {
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px
+}
+
+.nav a {
+    color: #fff;
+    padding: 0 10px;
+}
+
+.brand {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+.nav span {
+    color: #75A4C3;
+    padding: 5px 10px;
+}
+
+.all_posts {
+    background-color: #2c3e50;
+}
+
+/* register */
+
+.solo-page {
+    max-width: 600px;
+    margin: 0 auto;
+    border: 3px #999 solid;
+    padding: 35px;
+    border-radius: 4px;
+}
+
+.solo-page p {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.btn-register {
+    width: 100%;
+}
+
+/* login */
+
+.btn-login {
+    width: 100%;
+}
+
+.error-message {
+    color: rgb(196, 19, 19);
+}
+
+/* message */
+
+.posts-container {
+    padding: 0 50px;
+    margin: 0 auto;
+}
+
+.posts-container h1 {
+    margin-bottom: 20px;
+}
+
+.list-posts {
+    flex-direction: column;
+    gap: 10px;
+    
+}
+
+.post {
+    border: 3px #cbc7c7 solid;
+    border-radius: 8px;
+    padding: 20px;
+    gap: 30px;
+    justify-content: space-between;
+}
+
+.post-author-name {
+    margin-bottom: 8px;
+}
+
+/* submit */
+
+.page-new-post-btn {
+    align-items: center;
+    gap: 30px;
+}
+
+.page-new-post-btn a {
+    padding-top: 10px;
+}
